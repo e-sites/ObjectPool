@@ -36,9 +36,9 @@ override func viewDidLoad() {
    
    objectPool.onRelease = { obj in 
        DispatchQueue.main.async {
-	      // It's safe to remove the object from its superview,
-	      // since `ObjectPool` will keep its (memory) retained.
-          obj.removeFromSuperview()
+           // It's safe to remove the object from its superview,
+           // since `ObjectPool` will keep its (memory) retained.
+           obj.removeFromSuperview()
       }
    }
 }
