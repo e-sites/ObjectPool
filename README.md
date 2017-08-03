@@ -24,7 +24,7 @@ var objectPool: ObjectPool<SomeView>!
 override func viewDidLoad() {
    super.viewDidLoad()
     
-   objectPool = ObjectPool<SomeView>(size: 20,policy: .dynamic) { obj in
+   objectPool = ObjectPool<SomeView>(size: 20, policy: .dynamic) { obj in
        obj.backgroundColor = UIColor.red
    }
    
