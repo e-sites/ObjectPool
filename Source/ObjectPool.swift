@@ -8,8 +8,7 @@
 
 import Foundation
 
-/// Every ObjectPool Instance should inherit the `ObjectPoolInstance` protocol.
-/// - Warning: It's important that 
+/// Every ObjectPool Instance should inherit the `ObjectPoolInstance` protocol. 
 public protocol ObjectPoolInstance: class, Equatable {
     init()
 }
@@ -97,6 +96,10 @@ open class ObjectPool<Instance: ObjectPoolInstance> {
         _inPool[_pool.count] = true
         _pool.append(obj)
         return obj
+    }
+
+    deinit {
+        drain()
     }
 }
 

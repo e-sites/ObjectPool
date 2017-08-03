@@ -13,7 +13,13 @@ Compatible with:
 ## Usage
 ### Init
 ```swift
-let objectPool = ObjectPool<SomeUIView>(size: 20,policy: .dynamic) { obj in
+class UIView: ObjectPoolInstance {
+	required convenience init() {
+		self.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+	}
+}
+
+let objectPool = ObjectPool<SomeView>(size: 20,policy: .dynamic) { obj in
   obj.backgroundColor = UIColor.red
 }
 
@@ -22,6 +28,7 @@ let objectPool = ObjectPool<SomeUIView>(size: 20,policy: .dynamic) { obj in
 ```swift
 do {
   let object = try objectPool.acquire()
+  object.backgroundColor = UIColor.orange
 } catch let error {
   print("Error acquiring object: \(error)")
 }
@@ -37,16 +44,9 @@ do {
 ```
 
 ### Policies
-```swift
-/// The acquire policy
-public enum Policy {
-    /// If the pool is drained, fill up the pool with +1
-    case dynamic
 
-    /// If the pool is drained, throw `Error.drained`
-    case `static`
-}
-```
+- `dynamic`: If the pool is drained, fill up the pool with +1
+- `static `: The pool size is fixed. If the pool is drained, throw `Error.drained`
 
 ## Installation
 ### `Podfile`
