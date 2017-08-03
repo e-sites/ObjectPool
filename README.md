@@ -29,11 +29,17 @@ override func viewDidLoad() {
    }
    
    objectPool.onAcquire = { [weak self] obj in 
-       self?.view.addSubview(obj)
+	    DispatchQueue.main.async {
+           self?.view.addSubview(obj)
+       }
    }
    
    objectPool.onRelease = { obj in 
-      obj.removeFromSuperview()
+	   DispatchQueue.main.async {
+	      // It's safe to remove the object from its superview,
+	      // since `ObjectPool` will keep its (memory) retained.
+          obj.removeFromSuperview()
+      }
    }
 }
 ```
