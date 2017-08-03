@@ -69,15 +69,15 @@ open class ObjectPool<Instance: ObjectPoolInstance> {
 
     /// How many objects have been acquired, aka pulled out of the pool
     public var acquireCount: Int {
-        return _inPool.keys.filter { _inPool[$0] == false }.count
+        return _inPool.filter { !$0.value }.count
     }
 
     /// The `Policy`
     public let policy: Policy
 
-    private let _queue = DispatchQueue(label: "com.esites.library.objectpool")
-    private var _pool: [Instance] = []
-    private var _inPool: [Int: Bool] = [:]
+    fileprivate let _queue = DispatchQueue(label: "com.esites.library.objectpool")
+    fileprivate var _pool: [Instance] = []
+    fileprivate var _inPool: [Int: Bool] = [:]
 
     private(set) var factory: ((Instance) -> Void)?
 
@@ -112,6 +112,7 @@ extension ObjectPool {
         try _queue.sync {
             instance = try self._acquire()
         }
+
         return instance
     }
 
@@ -138,7 +139,6 @@ extension ObjectPool {
                 return ac(tinstance)
             }
         }
-
         return ac(instance)
     }
 }
