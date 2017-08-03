@@ -20,26 +20,26 @@ class UIView: ObjectPoolInstance {
 }
 
 let objectPool = ObjectPool<SomeView>(size: 20,policy: .dynamic) { obj in
-  obj.backgroundColor = UIColor.red
+	obj.backgroundColor = UIColor.red
 }
 
 ```
 ### Get an object from the pool:
 ```swift
 do {
-  let object = try objectPool.acquire()
-  object.backgroundColor = UIColor.orange
+	let object = try objectPool.acquire()
+	object.backgroundColor = UIColor.orange
 } catch let error {
-  print("Error acquiring object: \(error)")
+	print("Error acquiring object: \(error)")
 }
 ```
 
 ### Done using the object:
 ```swift
 do {
-  try objectPool.release(object)
+	try objectPool.release(object)
 } catch let error {
-  print("Error releasing object: \(error)")
+	print("Error releasing object: \(error)")
 }
 ```
 
