@@ -78,7 +78,15 @@ open class ObjectPool<Instance: ObjectPoolInstance> {
     fileprivate var _pool: [Instance] = []
     fileprivate var _inPool: [Int: Bool] = [:]
 
-    private(set) var factory: ((Instance) -> Void)?
+    fileprivate var factory: ((Instance) -> Void)?
+
+    /// Closure to be called when an object is released back into the pool.
+    /// This can be useful if you want to do some 'cleanup' actions before the object is returned to the pool.
+    public var onRelease: ((Instance) -> Void)?
+
+    /// Closure to be called when an object is acquired.
+    /// This can be useful if you want to do some general actions on the `Instance` object.
+    public var onAcquire: ((Instance) -> Void)?
 
     public init(size: Int, policy: Policy = .static, factory: ((Instance) -> Void)? = nil) {
         self.policy = policy
@@ -124,6 +132,7 @@ extension ObjectPool {
             if let index = _pool.index(of: obj) {
                 _inPool[index] = false
             }
+            self.onAcquire?(obj)
             return obj
         }
 
@@ -162,6 +171,7 @@ extension ObjectPool {
                 throw Error.notAcquired
             }
             self._inPool[index] = true
+            self.onRelease?(obj)
         }
     }
 
