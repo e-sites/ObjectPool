@@ -19,10 +19,23 @@ class UIView: ObjectPoolInstance {
     }
 }
 
-let objectPool = ObjectPool<SomeView>(size: 20,policy: .dynamic) { obj in
-    obj.backgroundColor = UIColor.red
-}
+var objectPool: ObjectPool<SomeView>!
 
+override func viewDidLoad() {
+   super.viewDidLoad()
+    
+   objectPool = ObjectPool<SomeView>(size: 20,policy: .dynamic) { obj in
+       obj.backgroundColor = UIColor.red
+   }
+   
+   objectPool.onAcquire = { [weak self] obj in 
+       self?.view.addSubview(obj)
+   }
+   
+   objectPool.onRelease = { obj in 
+      obj.removeFromSuperview()
+   }
+}
 ```
 ### Get an object from the pool:
 ```swift
@@ -36,11 +49,7 @@ do {
 
 ### Done using the object:
 ```swift
-do {
-    try objectPool.release(object)
-} catch let error {
-    print("Error releasing object: \(error)")
-}
+objectPool.release(object)
 ```
 
 ### Policies

@@ -31,11 +31,8 @@ public protocol ObjectPoolInstance: class, Equatable {
 ///
 /// ##Done using the object:
 ///
-///      do {
-///          try objectPool.release(object)
-///      } catch let error {
-///          print("Error releasing object: \(error)")
-///      }
+///      objectPool.release(object)
+///
 
 open class ObjectPool<Instance: ObjectPoolInstance> {
 
@@ -44,12 +41,6 @@ open class ObjectPool<Instance: ObjectPoolInstance> {
         /// Error getting an object from the pool, it's drained.
         /// This typically happens for `.static` Policies
         case drained
-
-        /// The released object is not initialized by this ObjectPool
-        case notInitialized
-
-        /// The released object hasn't been acquired yet
-        case notAcquired
     }
 
     /// The acquire policy
@@ -161,14 +152,14 @@ extension ObjectPool {
     /// - Parameters
     ///    - obj: `Instance`
     /// - Throws: See `ObjectPool.Error`
-    public func release(_ obj: Instance) throws {
-        try _queue.sync {
+    public func release(_ obj: Instance) {
+        _queue.async {
             guard let index = self._pool.index(of: obj) else {
-                throw Error.notInitialized
+                return
             }
 
             if self._inPool[index] == true {
-                throw Error.notAcquired
+                return
             }
             self._inPool[index] = true
             self.onRelease?(obj)
@@ -177,7 +168,7 @@ extension ObjectPool {
 
     /// Drains the entire pool.
     public func drain() {
-        _queue.sync {
+        _queue.async {
             self._inPool.removeAll()
             self._pool.removeAll()
         }
