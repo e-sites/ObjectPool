@@ -96,10 +96,6 @@ open class ObjectPool<Instance: ObjectPoolInstance> {
         _pool.append(obj)
         return obj
     }
-
-    deinit {
-        drain()
-    }
 }
 
 extension ObjectPool {
@@ -153,7 +149,10 @@ extension ObjectPool {
     ///    - obj: `Instance`
     /// - Throws: See `ObjectPool.Error`
     public func release(_ obj: Instance) {
-        _queue.async {
+        _queue.async { [weak self] in
+            guard let `self` = self else {
+                return
+            }
             guard let index = self._pool.index(of: obj) else {
                 return
             }
@@ -168,7 +167,10 @@ extension ObjectPool {
 
     /// Drains the entire pool.
     public func drain() {
-        _queue.async {
+        _queue.async { [weak self] in
+            guard let `self` = self else {
+                return
+            }
             self._inPool.removeAll()
             self._pool.removeAll()
         }
