@@ -99,6 +99,11 @@ open class ObjectPool<Instance: ObjectPoolInstance> {
 }
 
 extension ObjectPool {
+    fileprivate func sync(_ closure: () -> Void) {
+        objc_sync_enter(self)
+        closure()
+        objc_sync_exit(self)
+    }
 
     //
     /// Gets an instance from the `ObjectPool`
@@ -119,7 +124,9 @@ extension ObjectPool {
             if let index = _pool.index(of: obj) {
                 _inPool[index] = false
             }
-            self.onAcquire?(obj)
+            sync {
+                self.onAcquire?(obj)
+            }
             return obj
         }
 
@@ -153,15 +160,17 @@ extension ObjectPool {
             guard let `self` = self else {
                 return
             }
-            guard let index = self._pool.index(of: obj) else {
-                return
-            }
+            self.sync {
+                guard let index = self._pool.index(of: obj) else {
+                    return
+                }
 
-            if self._inPool[index] == true {
-                return
+                if self._inPool[index] == true {
+                    return
+                }
+                self._inPool[index] = true
+                self.onRelease?(obj)
             }
-            self._inPool[index] = true
-            self.onRelease?(obj)
         }
     }
 
@@ -171,8 +180,10 @@ extension ObjectPool {
             guard let `self` = self else {
                 return
             }
-            self._inPool.removeAll()
-            self._pool.removeAll()
+            self.sync {
+                self._inPool.removeAll()
+                self._pool.removeAll()
+            }
         }
     }
 }
