@@ -70,14 +70,8 @@ open class ObjectPool<Instance: ObjectPoolInstance> {
     fileprivate var _inPool: [Int: Bool] = [:]
 
     fileprivate var factory: ((Instance) -> Void)?
-
-    /// Closure to be called when an object is released back into the pool.
-    /// This can be useful if you want to do some 'cleanup' actions before the object is returned to the pool.
-    public var onRelease: ((Instance) -> Void)?
-
-    /// Closure to be called when an object is acquired.
-    /// This can be useful if you want to do some general actions on the `Instance` object.
-    public var onAcquire: ((Instance) -> Void)?
+    fileprivate var _onRelease: ((Instance) -> Void)?
+    fileprivate var _onAcquire: ((Instance) -> Void)?
 
     public init(size: Int, policy: Policy = .static, factory: ((Instance) -> Void)? = nil) {
         self.policy = policy
@@ -95,6 +89,18 @@ open class ObjectPool<Instance: ObjectPoolInstance> {
         _inPool[_pool.count] = true
         _pool.append(obj)
         return obj
+    }
+
+    /// Closure to be called when an object is acquired.
+    /// This can be useful if you want to do some general actions on the `Instance` object.
+    public func onAcquire(_ closure: ((Instance) -> Void)?) {
+        _onAcquire = closure
+    }
+
+    /// Closure to be called when an object is released back into the pool.
+    /// This can be useful if you want to do some 'cleanup' actions before the object is returned to the pool.
+    public func onRelease(_ closure: ((Instance) -> Void)?) {
+        _onRelease = closure
     }
 }
 
@@ -125,7 +131,7 @@ extension ObjectPool {
                 _inPool[index] = false
             }
             sync {
-                self.onAcquire?(obj)
+                self._onAcquire?(obj)
             }
             return obj
         }
@@ -169,7 +175,7 @@ extension ObjectPool {
                     return
                 }
                 self._inPool[index] = true
-                self.onRelease?(obj)
+                self._onRelease?(obj)
             }
         }
     }

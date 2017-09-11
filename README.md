@@ -13,7 +13,7 @@ Compatible with:
 ## Usage
 ### Init
 ```swift
-class SomeView: ObjectPoolInstance {
+class SomeView: UIView, ObjectPoolInstance {
     required convenience init() {
         self.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100)
     }
@@ -28,13 +28,13 @@ override func viewDidLoad() {
        obj.backgroundColor = UIColor.red
    }
    
-   objectPool.onAcquire = { [weak self] obj in 
+   objectPool.onAcquire { [weak self] obj in 
        DispatchQueue.main.async {
            self?.view.addSubview(obj)
        }
    }
    
-   objectPool.onRelease = { obj in 
+   objectPool.onRelease { obj in 
        DispatchQueue.main.async {
            // It's safe to remove the object from its superview,
            // since `ObjectPool` will keep its (memory) retained.
